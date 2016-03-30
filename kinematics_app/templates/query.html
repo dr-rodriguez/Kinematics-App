@@ -1,0 +1,52 @@
+<!doctype html>
+<title>BDNYC Kinematics Calculator</title>
+<link rel=stylesheet type=text/css href='{{ url_for('static',filename='style.css')}}'>
+
+<header id="branding">
+    <img src="static/images/BDNYC-logo.gif" width="500px" />
+    <ul>
+        <li><a href="http://www.bdnyc.org">Return to BDNYC Blog</a></li>
+    </ul>
+</header>
+
+<div class=page>
+
+    <h1>BDNYC Kinematics Calculator</h1>
+
+    <div class=metanav>
+        <p>
+            Text here
+        </p>
+
+        <hr>
+
+        <h4 id="all_known">Calculate XYZUVW</h4>
+
+        <form id='all_known' method='post' action='calculate' >
+            <p> Normal calculation:</p>
+            <p>
+                <input TYPE="TEXT" NAME="ra" VALUE="{{ra}}" SIZE=10>  RA (J2000, deg)<BR>
+                <input TYPE="TEXT" NAME="dec" VALUE="{{dec}}" SIZE=10>  Dec (J2000, deg)<BR>
+                <input TYPE="TEXT" NAME="pmra" VALUE="{{pmra}}" SIZE=10>  pmRA (mas/yr)<BR>
+                <input TYPE="TEXT" NAME="pmdec" VALUE="{{pmdec}}" SIZE=10>  pmDec (mas/yr)<BR>
+                <input TYPE="TEXT" NAME="dist" VALUE="{{dist}}" SIZE=10>  Distance (pc)<BR>
+                <input TYPE="TEXT" NAME="rv" VALUE="{{rv}}" SIZE=10>  Radial Velocity (km/s)<BR>
+                <input type='submit' value='Calculate' />
+            </p>
+        </form>
+
+        <form action="clear">
+            <input type="submit" value="Clear Form">
+        </form>
+
+    </div>
+
+    <hr>
+
+    <p id="grey_note">
+        Created by <a href="http://dr-rodriguez.github.io/">David R. Rodriguez</a> for the
+        <a href="http://www.bdnyc.org/">Brown Dwarfs in New York City (BDNYC)</a> research team.
+    </p>
+
+</div>
+

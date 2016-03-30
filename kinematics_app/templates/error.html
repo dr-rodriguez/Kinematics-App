@@ -1,0 +1,20 @@
+<!doctype html>
+<title>Error</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+
+<header id="branding">
+    <img src="static/images/BDNYC-logo.gif" width="500px">
+    <ul>
+        <li><a href="query">Return to Query Form</a></li>
+        <li><a href="http://www.bdnyc.org">Return to BDNYC Blog</a></li>
+    </ul>
+</header>
+
+<div class=error>
+    <h1>{{ headermessage|safe }}</h1>
+
+    {{ errmess|safe }}
+
+    <p><a href="query">Return</a></p>
+
+</div>
