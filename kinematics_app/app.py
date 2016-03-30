@@ -31,12 +31,8 @@ def app_query():
 @app.route('/calculate', methods=['GET', 'POST'])
 def app_calculate():
     # Grab the data
-    app.vars['ra'] = request.form['ra']
-    app.vars['dec'] = request.form['dec']
-    app.vars['pmra'] = request.form['pmra']
-    app.vars['pmdec'] = request.form['pmdec']
-    app.vars['rv'] = request.form['rv']
-    app.vars['dist'] = request.form['dist']
+    for key in request.form.keys():
+        app.vars[key] = request.form[key]
 
     # Convert to numbers
     ra = number_convert(app.vars['ra'])
