@@ -28,26 +28,26 @@ def app_query():
                            pmdec=app.vars['pmdec'],rv=app.vars['rv'],dist=app.vars['dist'])
 
 # Calculate for known values
-@app.route('/calculate', methods=['GET', 'POST'])
-def app_calculate():
+@app.route('/results', methods=['GET', 'POST'])
+def app_results():
     # Grab the data
     for key in request.form.keys():
         app.vars[key] = request.form[key]
 
     # Convert to numbers
-    ra = number_convert(app.vars['ra'])
-    dec = number_convert(app.vars['dec'])
-    pmra = number_convert(app.vars['pmra'])
-    pmdec = number_convert(app.vars['pmdec'])
-    rv = number_convert(app.vars['rv'])
-    dist = number_convert(app.vars['dist'])
+    df = dict()
+    for key in app.vars:
+        df[key] = number_convert(app.vars[key])
 
     # Calculate xyz, uvw
-    x,y,z = xyz(ra, dec, dist)
+    # x,y,z = xyz(ra, dec, dist)
+    # u,v,w = uvw(ra, dec, dist, pmra, pmdec, rv)
+    x, y, z = xyz(df['ra'], df['dec'], df['dist'])
+    u, v, w = uvw(df['ra'], df['dec'], df['dist'], df['pmra'], df['pmdec'], df['rv'])
 
-    data = pd.DataFrame({'X':[x], 'Y':[y], 'Z':[z]})
+    data = pd.DataFrame({'X': [x], 'Y': [y], 'Z': [z], 'U': [u], 'V': [v], 'W': [w]})
 
-    return data.to_html(classes='display', index=False)
+    return render_template('results.html', table=data.to_html(classes='display', index=False))
 
 
 # Called when you click clear button
