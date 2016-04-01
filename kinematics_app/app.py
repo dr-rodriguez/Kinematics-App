@@ -1,6 +1,9 @@
 from flask import Flask, redirect, render_template, request
 from druvw import xyz, uvw
 import pandas as pd
+from bokeh.plotting import figure, gridplot
+from bokeh.embed import components
+from bokeh.models import ColumnDataSource
 
 app = Flask(__name__)
 
@@ -40,14 +43,54 @@ def app_results():
         df[key] = number_convert(app.vars[key])
 
     # Calculate xyz, uvw
-    # x,y,z = xyz(ra, dec, dist)
-    # u,v,w = uvw(ra, dec, dist, pmra, pmdec, rv)
     x, y, z = xyz(df['ra'], df['dec'], df['dist'])
     u, v, w = uvw(df['ra'], df['dec'], df['dist'], df['pmra'], df['pmdec'], df['rv'])
 
     data = pd.DataFrame({'X': [x], 'Y': [y], 'Z': [z], 'U': [u], 'V': [v], 'W': [w]})
 
-    return render_template('results.html', table=data.to_html(classes='display', index=False))
+    source = ColumnDataSource(data=data)
+    # Figures
+    tools = "resize, pan, wheel_zoom, box_zoom, reset, lasso_select, box_select"
+    plot_size = 350
+
+    p1 = figure(width=plot_size, plot_height=plot_size, title=None, tools=tools)
+    p1.scatter('X', 'Y', source=source)
+    p1.xaxis.axis_label = 'X (pc)'
+    p1.yaxis.axis_label = 'Y (pc)'
+
+    p2 = figure(width=plot_size, plot_height=plot_size, title=None, x_range=p1.y_range, tools=tools)
+    p2.scatter('Y', 'Z', source=source)
+    p2.xaxis.axis_label = 'Y (pc)'
+    p2.yaxis.axis_label = 'Z (pc)'
+
+    p3 = figure(width=plot_size, plot_height=plot_size, title=None, x_range=p1.x_range, y_range=p2.y_range, tools=tools)
+    p3.scatter('X', 'Z', source=source)
+    p3.xaxis.axis_label = 'X (pc)'
+    p3.yaxis.axis_label = 'Z (pc)'
+
+    p4 = figure(width=plot_size, plot_height=plot_size, title=None, tools=tools)
+    p4.scatter('U', 'V', source=source)
+    p4.xaxis.axis_label = 'U (km/s)'
+    p4.yaxis.axis_label = 'V (km/s)'
+
+    p5 = figure(width=plot_size, plot_height=plot_size, title=None, x_range=p4.y_range, tools=tools)
+    p5.scatter('V', 'W', source=source)
+    p5.xaxis.axis_label = 'V (km/s)'
+    p5.yaxis.axis_label = 'W (km/s)'
+
+    p6 = figure(width=plot_size, plot_height=plot_size, title=None, x_range=p4.x_range, y_range=p5.y_range, tools=tools)
+    p6.scatter('U', 'W', source=source)
+    p6.xaxis.axis_label = 'U (km/s)'
+    p6.yaxis.axis_label = 'W (km/s)'
+
+    # Groups
+    p1.oval(x=[1, 2, 3], y=[1, 2, 3], width=0.2, height=40, color="#CAB2D6",
+           angle=0, height_units="screen")
+
+    p = gridplot([[p1, p2, p3],[p4, p5, p6]], toolbar_location="left")
+    script, div = components(p)
+
+    return render_template('results.html', table=data.to_html(classes='display', index=False), script=script, plot=div)
 
 
 # Called when you click clear button

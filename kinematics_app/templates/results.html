@@ -3,6 +3,9 @@
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 <script src="{{ url_for('static', filename='jquery-1.12.0.min.js')}} "></script>
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.js"></script>
+<link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-0.11.0.min.css" type="text/css" />
+<script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-0.11.0.min.js"></script>
+
 <script>
     $(document).ready( function () {
       $('.dataframe').DataTable( {
@@ -12,6 +15,8 @@
       } );
     } );
 </script>
+
+{{ script|safe }}
 
 <header id="branding">
     <img src="static/images/BDNYC-logo.gif" width="500px">
@@ -23,6 +28,9 @@
 
 <div class=page>
     <h1>Results</h1>
+
+    {{ plot|safe }}
+
     <br>
 
     {{ table|safe }}
