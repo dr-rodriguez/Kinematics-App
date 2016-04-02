@@ -53,14 +53,20 @@ def app_results():
     tools = "resize, pan, wheel_zoom, box_zoom, reset, lasso_select, box_select"
     plot_size = 350
 
-    # p1 = figure(width=plot_size, plot_height=plot_size, title=None, tools=tools, x_range=None)
-    # p1.scatter('X', 'Y', source=source)
-    # p1.xaxis.axis_label = 'X (pc)'
-    # p1.yaxis.axis_label = 'Y (pc)'
+    p1 = figure(width=plot_size, plot_height=plot_size, title=None, tools=tools)
+    p1.scatter('X', 'Y', source=source)
+    p1.xaxis.axis_label = 'X (pc)'
+    p1.yaxis.axis_label = 'Y (pc)'
 
-    p1 = basic_plot('X', 'Y', source, xlab='X (pc)', ylab='Y (pc)', tools=tools, plot_size=plot_size)
-    p2 = basic_plot('Y', 'Z', source, xlab='Y (pc)', ylab='Z (pc)', tools=tools, plot_size=plot_size)
-    p3 = basic_plot('X', 'Z', source, xlab='X (pc)', ylab='Z (pc)', tools=tools, plot_size=plot_size)
+    p2 = figure(width=plot_size, plot_height=plot_size, title=None, tools=tools, x_range=p1.y_range)
+    p2.scatter('Y', 'Z', source=source)
+    p2.xaxis.axis_label = 'Y (pc)'
+    p2.yaxis.axis_label = 'Z (pc)'
+
+    p3 = figure(width=plot_size, plot_height=plot_size, title=None, tools=tools, x_range=p1.x_range, y_range=p2.x_range)
+    p3.scatter('X', 'Z', source=source)
+    p3.xaxis.axis_label = 'X (pc)'
+    p3.yaxis.axis_label = 'Z (pc)'
 
     p4 = figure(width=plot_size, plot_height=plot_size, title=None, tools=tools)
     p4.scatter('U', 'V', source=source)
@@ -110,13 +116,3 @@ def number_convert(x):
         return render_template('error.html', headermessage='Error',
                                errmess='<p>Error converting number: ' + x + '</p>')
     return val
-
-# Function for plotting XYZUVW data
-def basic_plot(x, y, source, xlab=None, ylab=None,
-               tools="resize, pan, wheel_zoom, box_zoom, reset, lasso_select, box_select",
-               x_range=None, y_range=None, plot_size=350):
-    p = figure(width=plot_size, plot_height=plot_size, title=None, tools=tools, x_range=x_range, y_range=y_range)
-    p.scatter(x=x, y=y, source=source)
-    p.xaxis.axis_label = xlab
-    p.yaxis.axis_label = ylab
-    return p
