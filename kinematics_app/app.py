@@ -113,8 +113,6 @@ def app_simbad():
     customSimbad.add_votable_fields('ra(d)', 'dec(d)', 'pmra', 'pmdec', 'rv_value', 'plx')
     df = customSimbad.query_object(app.vars['name']).to_pandas()
 
-    # TODO: Add error handling
-
     # Clear and set values
     clear_values()
     app.vars['ra'] = df['RA_d'][0]
