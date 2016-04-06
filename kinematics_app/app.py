@@ -4,6 +4,9 @@ import pandas as pd
 from bokeh.plotting import figure, gridplot
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource
+from astroquery.simbad import Simbad
+import math
+import numpy as np
 
 app = Flask(__name__)
 
@@ -15,6 +18,7 @@ app.vars['pmra'] = '-66.19'
 app.vars['pmdec'] = '-13.90'
 app.vars['rv'] = '13.40'
 app.vars['dist'] = '53.7'
+app.vars['name'] = ''
 
 # Redirect to the main page
 @app.route('/')
@@ -27,8 +31,8 @@ def app_home():
 # Main page for queries
 @app.route('/query', methods=['GET', 'POST'])
 def app_query():
-    return render_template('query.html', ra=app.vars['ra'], dec=app.vars['dec'],pmra=app.vars['pmra'],
-                           pmdec=app.vars['pmdec'],rv=app.vars['rv'],dist=app.vars['dist'])
+    return render_template('query.html', ra=app.vars['ra'], dec=app.vars['dec'], pmra=app.vars['pmra'],
+                           pmdec=app.vars['pmdec'], rv=app.vars['rv'], dist=app.vars['dist'], name=app.vars['name'])
 
 # Calculate for known values
 @app.route('/results', methods=['GET', 'POST'])
@@ -40,7 +44,13 @@ def app_results():
     # Convert to numbers
     df = dict()
     for key in app.vars:
-        df[key] = number_convert(app.vars[key])
+        if key in ['name']: continue # don't convert
+        temp = number_convert(app.vars[key])
+        if math.isnan(temp):
+            return render_template('error.html', headermessage='Error',
+                                   errmess='<p>Error converting number: ' + app.vars[key] + '</p>')
+        else:
+            df[key] = temp
 
     # Calculate xyz, uvw
     x, y, z = xyz(df['ra'], df['dec'], df['dist'])
@@ -92,6 +102,29 @@ def app_results():
 
     return render_template('results.html', table=data.to_html(classes='display', index=False), script=script, plot=div)
 
+# Called when you click Resolve on Simbad button
+@app.route('/simbad', methods=['GET', 'POST'])
+def app_simbad():
+    app.vars['name'] = request.form['name']
+
+    # Get the relevant information from Simbad
+    customSimbad = Simbad()
+    customSimbad.remove_votable_fields('coordinates')
+    customSimbad.add_votable_fields('ra(d)', 'dec(d)', 'pmra', 'pmdec', 'rv_value', 'plx')
+    df = customSimbad.query_object(app.vars['name']).to_pandas()
+
+    # TODO: Add error handling
+
+    # Clear and set values
+    clear_values()
+    app.vars['ra'] = df['RA_d'][0]
+    app.vars['dec'] = df['DEC_d'][0]
+    app.vars['pmra'] = df['PMRA'][0]
+    app.vars['pmdec'] = df['PMDEC'][0]
+    app.vars['rv'] = df['RV_VALUE'][0]
+    app.vars['dist'] = 1000./df['PLX_VALUE'][0]
+
+    return redirect('/query')
 
 # Called when you click clear button
 @app.route('/clear')
@@ -101,18 +134,13 @@ def app_clear():
 
 # Function to clear values
 def clear_values():
-    app.vars['ra'] = ''
-    app.vars['dec'] = ''
-    app.vars['pmra'] = ''
-    app.vars['pmdec'] = ''
-    app.vars['rv'] = ''
-    app.vars['dist'] = ''
+    for key in app.vars.keys():
+        app.vars[key] = ''
 
 # Function to convert to numbers and have proper error handling
 def number_convert(x):
     try:
         val = float(x)
     except ValueError:
-        return render_template('error.html', headermessage='Error',
-                               errmess='<p>Error converting number: ' + x + '</p>')
+        val = np.nan
     return val
