@@ -120,7 +120,13 @@ def app_simbad():
     customSimbad = Simbad()
     customSimbad.remove_votable_fields('coordinates')
     customSimbad.add_votable_fields('ra(d)', 'dec(d)', 'pmra', 'pmdec', 'rv_value', 'plx')
-    df = customSimbad.query_object(app.vars['name']).to_pandas()
+    simbad_query = customSimbad.query_object(app.vars['name'])
+
+    try:
+        df = simbad_query.to_pandas()
+    except AttributeError: # no result
+        return render_template('error.html', headermessage='Error',
+                                   errmess='<p>Error querying Simbad for: ' + app.vars['name'] + '</p>')
 
     # Clear and set values
     clear_values()
