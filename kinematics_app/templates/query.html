@@ -36,12 +36,24 @@
                 <input TYPE="TEXT" NAME="pmdec" VALUE="{{pmdec}}" SIZE=10>  pmDec (mas/yr)<BR>
                 <input TYPE="TEXT" NAME="dist" VALUE="{{dist}}" SIZE=10>  Distance (pc)<BR>
                 <input TYPE="TEXT" NAME="rv" VALUE="{{rv}}" SIZE=10>  Radial Velocity (km/s)<BR>
+                <input type="hidden" name="type_flag" value="normal">
                 <input type='submit' value='Calculate' />
             </p>
         </form>
 
         <form action="clear">
             <input type="submit" value="Clear Form">
+        </form>
+
+        <form id="multi_rv" method="post" action="results">
+            <p>Range of radial velocity:</p>
+            <p>
+                <input type="text" name="rv_ini" value="" size=10> Initial Velocity (km/s)<br>
+                <input type="text" name="rv_fin" value="" size=10> Final Velocity (km/s)<br>
+                <input type="text" name="rv_step" value="" size=10> Velocity Step (km/s)<br>
+                <input type="hidden" name="type_flag" value="multi_rv">
+                <input type="submit" value="Calculate">
+            </p>
         </form>
 
     </div>

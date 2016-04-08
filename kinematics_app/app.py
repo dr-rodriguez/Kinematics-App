@@ -7,6 +7,8 @@ from bokeh.models import ColumnDataSource, HoverTool
 from astroquery.simbad import Simbad
 import math
 import numpy as np
+from itertools import repeat
+
 
 app = Flask(__name__)
 
@@ -19,6 +21,9 @@ app.vars['pmdec'] = '-13.90'
 app.vars['rv'] = '13.40'
 app.vars['dist'] = '53.7'
 app.vars['name'] = ''
+app.vars['rv_ini'] = ''
+app.vars['rv_fin'] = ''
+app.vars['rv_step'] = ''
 
 # Redirect to the main page
 @app.route('/')
@@ -31,6 +36,7 @@ def app_home():
 # Main page for queries
 @app.route('/query', methods=['GET', 'POST'])
 def app_query():
+    # TODO: Add multi_rv vars to query page
     return render_template('query.html', ra=app.vars['ra'], dec=app.vars['dec'], pmra=app.vars['pmra'],
                            pmdec=app.vars['pmdec'], rv=app.vars['rv'], dist=app.vars['dist'], name=app.vars['name'])
 
@@ -39,12 +45,20 @@ def app_query():
 def app_results():
     # Grab the data
     for key in request.form.keys():
+        if key == 'type_flag': continue
         app.vars[key] = request.form[key]
 
     # Convert to numbers
     df = dict()
     for key in app.vars:
-        if key in ['name']: continue # don't convert
+        if key in ['name']: continue  # don't convert
+
+        # TODO: Add multi_dist functionality
+        if request.form['type_flag'] == 'normal':
+            if key in ['rv_ini', 'rv_fin', 'rv_step']: continue
+        if request.form['type_flag'] == 'multi_rv':
+            if key in ['rv']: continue
+
         temp = number_convert(app.vars[key])
         if math.isnan(temp):
             return render_template('error.html', headermessage='Error',
@@ -53,18 +67,38 @@ def app_results():
             df[key] = temp
 
     # Calculate xyz, uvw
-    x, y, z = xyz(df['ra'], df['dec'], df['dist'])
-    u, v, w = uvw(df['ra'], df['dec'], df['dist'], df['pmra'], df['pmdec'], df['rv'])
+    if request.form['type_flag'] == 'normal':
+        x, y, z = xyz(df['ra'], df['dec'], df['dist'])
+        u, v, w = uvw(df['ra'], df['dec'], df['dist'], df['pmra'], df['pmdec'], df['rv'])
+    if request.form['type_flag'] == 'multi_rv':
+        rv_array = np.arange(df['rv_ini'], df['rv_fin'], df['rv_step'])
+        if rv_array[-1] != df['rv_fin']:
+            rv_array = np.append(rv_array, df['rv_fin'])
+        arr_len = len(rv_array)
+        x, y, z = xyz([df['ra']] * arr_len,
+                      [df['dec']] * arr_len,
+                      [df['dist']] * arr_len)
+        u, v, w = uvw([df['ra']] * arr_len,
+                      [df['dec']] * arr_len,
+                      [df['dist']] * arr_len,
+                      [df['pmra']] * arr_len,
+                      [df['pmdec']] * arr_len,
+                      rv_array)
 
-    data = pd.DataFrame({'X': [x], 'Y': [y], 'Z': [z], 'U': [u], 'V': [v], 'W': [w]})
+    if request.form['type_flag'] == 'normal':
+        data = pd.DataFrame({'X': [x], 'Y': [y], 'Z': [z], 'U': [u], 'V': [v], 'W': [w]})
+    else:
+        data = pd.DataFrame({'X': x, 'Y': y, 'Z': z, 'U': u, 'V': v, 'W': w})
 
-    source = ColumnDataSource(data=data)
+    # TODO: Update hover tooltip for multi_rv and multi_dist (should say rv and dist)
     # Figures
-    tools = "resize, pan, wheel_zoom, box_zoom, reset, lasso_select, box_select, hover"
+    source = ColumnDataSource(data=data)
+    tools = "resize, pan, wheel_zoom, box_zoom, reset"
     plot_size = 350
     point_size = 10
     point_color = 'black'
 
+    # TODO: Have figures be a single function call
     p1 = figure(width=plot_size, plot_height=plot_size, title=None, tools=tools)
     p1.scatter('X', 'Y', source=source, size=point_size, color=point_color)
     p1.xaxis.axis_label = 'X (pc)'
@@ -96,12 +130,19 @@ def app_results():
     p6.yaxis.axis_label = 'W (km/s)'
 
     # Hover tooltips
-    p1.select(HoverTool).tooltips = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
-    p2.select(HoverTool).tooltips = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
-    p3.select(HoverTool).tooltips = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
-    p4.select(HoverTool).tooltips = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
-    p5.select(HoverTool).tooltips = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
-    p6.select(HoverTool).tooltips = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
+    #p1.select(HoverTool).tooltips = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
+    # p2.select(HoverTool).tooltips = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
+    # p3.select(HoverTool).tooltips = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
+    # p4.select(HoverTool).tooltips = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
+    # p5.select(HoverTool).tooltips = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
+    # p6.select(HoverTool).tooltips = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
+    if request.form['type_flag'] == 'normal':
+        p1.add_tools(HoverTool(tooltips={"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}))
+        p2.add_tools(HoverTool(tooltips={"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}))
+        p3.add_tools(HoverTool(tooltips={"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}))
+    p4.add_tools(HoverTool(tooltips={"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}))
+    p5.add_tools(HoverTool(tooltips={"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}))
+    p6.add_tools(HoverTool(tooltips={"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}))
 
     # Nearby Young Moving Groups
     nymg_plot(p1, p2, p3, p4, p5, p6)
