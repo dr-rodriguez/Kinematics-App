@@ -89,9 +89,9 @@ def app_results():
     if request.form['type_flag'] == 'normal':
         data = pd.DataFrame({'X': [x], 'Y': [y], 'Z': [z], 'U': [u], 'V': [v], 'W': [w]})
     else:
-        data = pd.DataFrame({'X': x, 'Y': y, 'Z': z, 'U': u, 'V': v, 'W': w})
+        if request.form['type_flag'] == 'multi_rv':
+            data = pd.DataFrame({'RV':rv_array, 'X': x, 'Y': y, 'Z': z, 'U': u, 'V': v, 'W': w})
 
-    # TODO: Update hover tooltip for multi_rv and multi_dist (should say rv and dist)
     # Figures
     source = ColumnDataSource(data=data)
     tools = "resize, pan, wheel_zoom, box_zoom, reset"
@@ -99,51 +99,24 @@ def app_results():
     point_size = 10
     point_color = 'black'
 
-    # TODO: Have figures be a single function call
-    p1 = figure(width=plot_size, plot_height=plot_size, title=None, tools=tools)
-    p1.scatter('X', 'Y', source=source, size=point_size, color=point_color)
-    p1.xaxis.axis_label = 'X (pc)'
-    p1.yaxis.axis_label = 'Y (pc)'
+    hover_flags = [True, True]  # for XYZ and for UVW plots
+    if request.form['type_flag'] == 'multi_rv':  # disable for multi_rv plots, but only for XYZ
+        hover_flags[0] = False
 
-    p2 = figure(width=plot_size, plot_height=plot_size, title=None, tools=tools, x_range=p1.y_range)
-    p2.scatter('Y', 'Z', source=source, size=point_size, color=point_color)
-    p2.xaxis.axis_label = 'Y (pc)'
-    p2.yaxis.axis_label = 'Z (pc)'
+    # TODO: Add explicit tools, plot_size, point_size, etc, just in case
+    p1 = my_plot('X', 'Y', source, 'X (pc)', 'Y (pc)', x_range=None, y_range=None,
+                 type_flag=request.form['type_flag'], hover_flag=hover_flags[0])
+    p2 = my_plot('Y', 'Z', source, 'Y (pc)', 'Z (pc)', x_range=p1.y_range, y_range=None,
+                 type_flag=request.form['type_flag'], hover_flag=hover_flags[0])
+    p3 = my_plot('X', 'Z', source, 'X (pc)', 'Z (pc)', x_range=p1.x_range, y_range=p2.y_range,
+                 type_flag=request.form['type_flag'], hover_flag=hover_flags[0])
 
-    p3 = figure(width=plot_size, plot_height=plot_size, title=None, tools=tools, x_range=p1.x_range, y_range=p2.y_range)
-    p3.scatter('X', 'Z', source=source, size=point_size, color=point_color)
-    p3.xaxis.axis_label = 'X (pc)'
-    p3.yaxis.axis_label = 'Z (pc)'
-
-    p4 = figure(width=plot_size, plot_height=plot_size, title=None, tools=tools)
-    p4.scatter('U', 'V', source=source, size=point_size, color=point_color)
-    p4.xaxis.axis_label = 'U (km/s)'
-    p4.yaxis.axis_label = 'V (km/s)'
-
-    p5 = figure(width=plot_size, plot_height=plot_size, title=None, x_range=p4.y_range, tools=tools)
-    p5.scatter('V', 'W', source=source, size=point_size, color=point_color)
-    p5.xaxis.axis_label = 'V (km/s)'
-    p5.yaxis.axis_label = 'W (km/s)'
-
-    p6 = figure(width=plot_size, plot_height=plot_size, title=None, x_range=p4.x_range, y_range=p5.y_range, tools=tools)
-    p6.scatter('U', 'W', source=source, size=point_size, color=point_color)
-    p6.xaxis.axis_label = 'U (km/s)'
-    p6.yaxis.axis_label = 'W (km/s)'
-
-    # Hover tooltips
-    #p1.select(HoverTool).tooltips = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
-    # p2.select(HoverTool).tooltips = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
-    # p3.select(HoverTool).tooltips = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
-    # p4.select(HoverTool).tooltips = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
-    # p5.select(HoverTool).tooltips = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
-    # p6.select(HoverTool).tooltips = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
-    if request.form['type_flag'] == 'normal':
-        p1.add_tools(HoverTool(tooltips={"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}))
-        p2.add_tools(HoverTool(tooltips={"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}))
-        p3.add_tools(HoverTool(tooltips={"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}))
-    p4.add_tools(HoverTool(tooltips={"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}))
-    p5.add_tools(HoverTool(tooltips={"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}))
-    p6.add_tools(HoverTool(tooltips={"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}))
+    p4 = my_plot('U', 'V', source, 'U (km/s)', 'V (km/s)', x_range=None, y_range=None,
+                 type_flag=request.form['type_flag'], hover_flag=hover_flags[1])
+    p5 = my_plot('V', 'W', source, 'V (km/s)', 'W (km/s)', x_range=p4.y_range, y_range=None,
+                 type_flag=request.form['type_flag'], hover_flag=hover_flags[1])
+    p6 = my_plot('U', 'W', source, 'U (km/s)', 'W (km/s)', x_range=p4.x_range, y_range=p5.y_range,
+                 type_flag=request.form['type_flag'], hover_flag=hover_flags[1])
 
     # Nearby Young Moving Groups
     nymg_plot(p1, p2, p3, p4, p5, p6)
@@ -243,3 +216,23 @@ def nymg_plot(p1,p2,p3,p4,p5,p6):
             angle=0, height_units='data', width_units='data', fill_alpha=0.5)
 
     return
+
+# Function to make the basic plots
+def my_plot(xvar, yvar, source, xlabel, ylabel, point_size=10,
+            point_color='black', plot_size=350, tools="resize, pan, wheel_zoom, box_zoom, reset",
+            x_range=None, y_range=None, type_flag='normal', hover_flag=True):
+    p = figure(width=plot_size, plot_height=plot_size, title=None, tools=tools, x_range=x_range, y_range=y_range)
+    p.scatter(xvar, yvar, source=source, size=point_size, color=point_color)
+    p.xaxis.axis_label = xlabel
+    p.yaxis.axis_label = ylabel
+
+    # TODO: Update for multi_dist
+    if type_flag == "normal":
+        tooltip = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
+    if type_flag == 'multi_rv':
+        tooltip = {"RV": "@RV", "(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
+
+    if hover_flag:
+        p.add_tools(HoverTool(tooltips=tooltip))
+
+    return p
