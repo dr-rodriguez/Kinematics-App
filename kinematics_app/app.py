@@ -85,6 +85,7 @@ def app_results():
                       [df['pmdec']] * arr_len,
                       rv_array)
 
+    # TODO: Add rv/dist to output data frame
     if request.form['type_flag'] == 'normal':
         data = pd.DataFrame({'X': [x], 'Y': [y], 'Z': [z], 'U': [u], 'V': [v], 'W': [w]})
     else:
@@ -109,7 +110,7 @@ def app_results():
     p2.xaxis.axis_label = 'Y (pc)'
     p2.yaxis.axis_label = 'Z (pc)'
 
-    p3 = figure(width=plot_size, plot_height=plot_size, title=None, tools=tools, x_range=p1.x_range, y_range=p2.x_range)
+    p3 = figure(width=plot_size, plot_height=plot_size, title=None, tools=tools, x_range=p1.x_range, y_range=p2.y_range)
     p3.scatter('X', 'Z', source=source, size=point_size, color=point_color)
     p3.xaxis.axis_label = 'X (pc)'
     p3.yaxis.axis_label = 'Z (pc)'
@@ -214,7 +215,11 @@ def nymg_plot(p1,p2,p3,p4,p5,p6):
     g_Ye = np.array([15.19, 7.33, 9.17, 20.55, 16.69, 19.06, 18.83])
     g_Z = [-13.59, 21.55, -35.4, -27.97, -22.95, -6.72, -15.62]
     g_Ze = np.array([8.22, 4.2, 5.39, 15.09, 2.74, 11.43, 16.59])
-    g_color = ['blue', 'green', 'red', 'yellow', 'magenta', 'cyan', 'grey']
+
+    # TODO: Decide on final colors for groups
+    #g_color = ['blue', 'green', 'red', 'yellow', 'magenta', 'cyan', 'grey']
+    #g_color = ['#7fc97f','#beaed4','#fdc086','#ffff99','#386cb0','#f0027f','#bf5b17'] #Accent
+    g_color = ['#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02','#a6761d'] #Dark2
 
     # Hover does not work for Oval :(
     p1.oval(x=g_X, y=g_Y, width=g_Xe * 2, height=g_Ye * 2, color=g_color,
