@@ -7,8 +7,6 @@ from bokeh.models import ColumnDataSource, HoverTool
 from astroquery.simbad import Simbad
 import math
 import numpy as np
-from itertools import repeat
-
 
 app = Flask(__name__)
 
@@ -38,14 +36,16 @@ def app_home():
 def app_query():
     # TODO: Add multi_rv vars to query page
     return render_template('query.html', ra=app.vars['ra'], dec=app.vars['dec'], pmra=app.vars['pmra'],
-                           pmdec=app.vars['pmdec'], rv=app.vars['rv'], dist=app.vars['dist'], name=app.vars['name'])
+                           pmdec=app.vars['pmdec'], rv=app.vars['rv'], dist=app.vars['dist'], name=app.vars['name'],
+                           rv_ini=app.vars['rv_ini'], rv_fin=app.vars['rv_fin'], rv_step=app.vars['rv_step'])
 
 # Calculate for known values
 @app.route('/results', methods=['GET', 'POST'])
 def app_results():
     # Grab the data
     for key in request.form.keys():
-        if key == 'type_flag': continue
+        if key == 'type_flag':
+            continue
         app.vars[key] = request.form[key]
 
     # Convert to numbers
@@ -103,19 +103,27 @@ def app_results():
     if request.form['type_flag'] == 'multi_rv':  # disable for multi_rv plots, but only for XYZ
         hover_flags[0] = False
 
-    # TODO: Add explicit tools, plot_size, point_size, etc, just in case
+    # Create the main plots
+    # XYZ Plots
     p1 = my_plot('X', 'Y', source, 'X (pc)', 'Y (pc)', x_range=None, y_range=None,
+                 point_size=point_size, point_color=point_color, plot_size=plot_size, tools=tools,
                  type_flag=request.form['type_flag'], hover_flag=hover_flags[0])
     p2 = my_plot('Y', 'Z', source, 'Y (pc)', 'Z (pc)', x_range=p1.y_range, y_range=None,
+                 point_size=point_size, point_color=point_color, plot_size=plot_size, tools=tools,
                  type_flag=request.form['type_flag'], hover_flag=hover_flags[0])
     p3 = my_plot('X', 'Z', source, 'X (pc)', 'Z (pc)', x_range=p1.x_range, y_range=p2.y_range,
+                 point_size=point_size, point_color=point_color, plot_size=plot_size, tools=tools,
                  type_flag=request.form['type_flag'], hover_flag=hover_flags[0])
 
+    # UVW Plots
     p4 = my_plot('U', 'V', source, 'U (km/s)', 'V (km/s)', x_range=None, y_range=None,
+                 point_size=point_size, point_color=point_color, plot_size=plot_size, tools=tools,
                  type_flag=request.form['type_flag'], hover_flag=hover_flags[1])
     p5 = my_plot('V', 'W', source, 'V (km/s)', 'W (km/s)', x_range=p4.y_range, y_range=None,
+                 point_size=point_size, point_color=point_color, plot_size=plot_size, tools=tools,
                  type_flag=request.form['type_flag'], hover_flag=hover_flags[1])
     p6 = my_plot('U', 'W', source, 'U (km/s)', 'W (km/s)', x_range=p4.x_range, y_range=p5.y_range,
+                 point_size=point_size, point_color=point_color, plot_size=plot_size, tools=tools,
                  type_flag=request.form['type_flag'], hover_flag=hover_flags[1])
 
     # Nearby Young Moving Groups
