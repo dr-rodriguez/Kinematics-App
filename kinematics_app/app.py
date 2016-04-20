@@ -198,9 +198,10 @@ def nymg_plot(p1,p2,p3,p4,p5,p6):
     g_Ze = np.array([8.22, 4.2, 5.39, 15.09, 2.74, 11.43, 16.59])
 
     # TODO: Decide on final colors for groups
-    #g_color = ['blue', 'green', 'red', 'yellow', 'magenta', 'cyan', 'grey']
-    #g_color = ['#7fc97f','#beaed4','#fdc086','#ffff99','#386cb0','#f0027f','#bf5b17'] #Accent
-    g_color = ['#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02','#a6761d'] #Dark2
+    # g_color = ['blue', 'green', 'red', 'yellow', 'magenta', 'cyan', 'grey']
+    # g_color = ['#7fc97f','#beaed4','#fdc086','#ffff99','#386cb0','#f0027f','#bf5b17'] #Accent
+    # g_color = ['#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02','#a6761d'] #Dark2
+    g_color = ['#0000CD', '#FF0000', '#008000', '#FF00FF', '#7FFFD4', '#9400D3', '#FF8C00']  # Colors from Faherty paper
 
     # Hover does not work for Oval :(
     p1.oval(x=g_X, y=g_Y, width=g_Xe * 2, height=g_Ye * 2, color=g_color,
