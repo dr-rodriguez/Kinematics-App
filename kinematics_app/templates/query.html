@@ -56,6 +56,17 @@
             </p>
         </form>
 
+        <form id="multi_dist" method="post" action="results">
+            <p>Range of distances:</p>
+            <p>
+                <input type="text" name="dist_ini" value="" size=10> Initial Distance (pc)<br>
+                <input type="text" name="dist_fin" value="" size=10> Final Distance (pc)<br>
+                <input type="text" name="dist_step" value="" size=10> Distance Step (pc)<br>
+                <input type="hidden" name="type_flag" value="multi_dist">
+                <input type="submit" value="Calculate">
+            </p>
+        </form>
+
     </div>
 
     <hr>

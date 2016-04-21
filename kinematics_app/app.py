@@ -22,6 +22,9 @@ app.vars['name'] = ''
 app.vars['rv_ini'] = ''
 app.vars['rv_fin'] = ''
 app.vars['rv_step'] = ''
+app.vars['dist_ini'] = ''
+app.vars['dist_fin'] = ''
+app.vars['dist_step'] = ''
 
 # Redirect to the main page
 @app.route('/')
@@ -37,7 +40,8 @@ def app_query():
     # TODO: Add multi_rv vars to query page
     return render_template('query.html', ra=app.vars['ra'], dec=app.vars['dec'], pmra=app.vars['pmra'],
                            pmdec=app.vars['pmdec'], rv=app.vars['rv'], dist=app.vars['dist'], name=app.vars['name'],
-                           rv_ini=app.vars['rv_ini'], rv_fin=app.vars['rv_fin'], rv_step=app.vars['rv_step'])
+                           rv_ini=app.vars['rv_ini'], rv_fin=app.vars['rv_fin'], rv_step=app.vars['rv_step'],
+                           dist_ini=app.vars['dist_ini'], dist_fin=app.vars['dist_fin'], dist_step=app.vars['dist_step'])
 
 # Calculate for known values
 @app.route('/results', methods=['GET', 'POST'])
@@ -55,14 +59,16 @@ def app_results():
 
         # TODO: Add multi_dist functionality
         if request.form['type_flag'] == 'normal':
-            if key in ['rv_ini', 'rv_fin', 'rv_step']: continue
+            if key in ['rv_ini', 'rv_fin', 'rv_step', 'dist_ini', 'dist_fin', 'dist_step']: continue
         if request.form['type_flag'] == 'multi_rv':
-            if key in ['rv']: continue
+            if key in ['rv', 'dist_ini', 'dist_fin', 'dist_step']: continue
+        if request.form['type_flag'] == 'multi_dist':
+            if key in ['dist', 'rv_ini', 'rv_fin', 'rv_step']: continue
 
         temp = number_convert(app.vars[key])
         if math.isnan(temp):
             return render_template('error.html', headermessage='Error',
-                                   errmess='<p>Error converting number: ' + app.vars[key] + '</p>')
+                                   errmess='<p>Error converting number: ' + app.vars[key] + ' (' + key + ')' + '</p>')
         else:
             df[key] = temp
 
@@ -84,13 +90,28 @@ def app_results():
                       [df['pmra']] * arr_len,
                       [df['pmdec']] * arr_len,
                       rv_array)
+    if request.form['type_flat'] == 'multi_dist':
+        dist_array = np.arange(df['dist_ini'], df['dist_fin'], df['dist_step'])
+        if dist_array[-1] != df['dist_fin']:
+            dist_array = np.append(dist_array, df['dist_fin'])
+        arr_len = len(dist_array)
+        x, y, z = xyz([df['ra']] * arr_len,
+                      [df['dec']] * arr_len,
+                      dist_array)
+        u, v, w = uvw([df['ra']] * arr_len,
+                      [df['dec']] * arr_len,
+                      dist_array,
+                      [df['pmra']] * arr_len,
+                      [df['pmdec']] * arr_len,
+                      [df['rv']] * arr_len)
 
     # TODO: Add rv/dist to output data frame
     if request.form['type_flag'] == 'normal':
         data = pd.DataFrame({'X': [x], 'Y': [y], 'Z': [z], 'U': [u], 'V': [v], 'W': [w]})
-    else:
-        if request.form['type_flag'] == 'multi_rv':
-            data = pd.DataFrame({'RV':rv_array, 'X': x, 'Y': y, 'Z': z, 'U': u, 'V': v, 'W': w})
+    if request.form['type_flag'] == 'multi_rv':
+        data = pd.DataFrame({'RV':rv_array, 'X': x, 'Y': y, 'Z': z, 'U': u, 'V': v, 'W': w})
+    if request.form['type_flag'] == 'multi_dist':
+        data = pd.DataFrame({'Dist': dist_array, 'X': x, 'Y': y, 'Z': z, 'U': u, 'V': v, 'W': w})
 
     # Figures
     source = ColumnDataSource(data=data)
