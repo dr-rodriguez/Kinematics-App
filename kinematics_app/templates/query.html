@@ -48,9 +48,9 @@
         <form id="multi_rv" method="post" action="results">
             <p>Range of radial velocity:</p>
             <p>
-                <input type="text" name="rv_ini" value="" size=10> Initial Velocity (km/s)<br>
-                <input type="text" name="rv_fin" value="" size=10> Final Velocity (km/s)<br>
-                <input type="text" name="rv_step" value="" size=10> Velocity Step (km/s)<br>
+                <input type="text" name="rv_ini" value="{{rv_ini}}" size=10> Initial Velocity (km/s)<br>
+                <input type="text" name="rv_fin" value="{{rv_fin}}" size=10> Final Velocity (km/s)<br>
+                <input type="text" name="rv_step" value="{{rv_step}}" size=10> Velocity Step (km/s)<br>
                 <input type="hidden" name="type_flag" value="multi_rv">
                 <input type="submit" value="Calculate">
             </p>
@@ -59,9 +59,9 @@
         <form id="multi_dist" method="post" action="results">
             <p>Range of distances:</p>
             <p>
-                <input type="text" name="dist_ini" value="" size=10> Initial Distance (pc)<br>
-                <input type="text" name="dist_fin" value="" size=10> Final Distance (pc)<br>
-                <input type="text" name="dist_step" value="" size=10> Distance Step (pc)<br>
+                <input type="text" name="dist_ini" value="{{dist_ini}}" size=10> Initial Distance (pc)<br>
+                <input type="text" name="dist_fin" value="{{dist_fin}}" size=10> Final Distance (pc)<br>
+                <input type="text" name="dist_step" value="{{dist_step}}" size=10> Distance Step (pc)<br>
                 <input type="hidden" name="type_flag" value="multi_dist">
                 <input type="submit" value="Calculate">
             </p>

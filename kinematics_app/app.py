@@ -37,7 +37,6 @@ def app_home():
 # Main page for queries
 @app.route('/query', methods=['GET', 'POST'])
 def app_query():
-    # TODO: Add multi_rv vars to query page
     return render_template('query.html', ra=app.vars['ra'], dec=app.vars['dec'], pmra=app.vars['pmra'],
                            pmdec=app.vars['pmdec'], rv=app.vars['rv'], dist=app.vars['dist'], name=app.vars['name'],
                            rv_ini=app.vars['rv_ini'], rv_fin=app.vars['rv_fin'], rv_step=app.vars['rv_step'],
@@ -57,7 +56,6 @@ def app_results():
     for key in app.vars:
         if key in ['name']: continue  # don't convert
 
-        # TODO: Add multi_dist functionality
         if request.form['type_flag'] == 'normal':
             if key in ['rv_ini', 'rv_fin', 'rv_step', 'dist_ini', 'dist_fin', 'dist_step']: continue
         if request.form['type_flag'] == 'multi_rv':
@@ -90,7 +88,7 @@ def app_results():
                       [df['pmra']] * arr_len,
                       [df['pmdec']] * arr_len,
                       rv_array)
-    if request.form['type_flat'] == 'multi_dist':
+    if request.form['type_flag'] == 'multi_dist':
         dist_array = np.arange(df['dist_ini'], df['dist_fin'], df['dist_step'])
         if dist_array[-1] != df['dist_fin']:
             dist_array = np.append(dist_array, df['dist_fin'])
@@ -105,7 +103,6 @@ def app_results():
                       [df['pmdec']] * arr_len,
                       [df['rv']] * arr_len)
 
-    # TODO: Add rv/dist to output data frame
     if request.form['type_flag'] == 'normal':
         data = pd.DataFrame({'X': [x], 'Y': [y], 'Z': [z], 'U': [u], 'V': [v], 'W': [w]})
     if request.form['type_flag'] == 'multi_rv':
@@ -222,7 +219,7 @@ def nymg_plot(p1,p2,p3,p4,p5,p6):
     # g_color = ['blue', 'green', 'red', 'yellow', 'magenta', 'cyan', 'grey']
     # g_color = ['#7fc97f','#beaed4','#fdc086','#ffff99','#386cb0','#f0027f','#bf5b17'] #Accent
     # g_color = ['#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02','#a6761d'] #Dark2
-    g_color = ['#0000CD', '#FF0000', '#008000', '#FF00FF', '#7FFFD4', '#9400D3', '#FF8C00']  # Colors from Faherty paper
+    g_color = ['#0000CD', '#FF0000', '#008000', '#FF00FF', '#7FFFD4', '#9400D3', '#FF8C00']  # From Faherty paper
 
     # Hover does not work for Oval :(
     p1.oval(x=g_X, y=g_Y, width=g_Xe * 2, height=g_Ye * 2, color=g_color,
@@ -251,16 +248,19 @@ def nymg_plot(p1,p2,p3,p4,p5,p6):
 def my_plot(xvar, yvar, source, xlabel, ylabel, point_size=10,
             point_color='black', plot_size=350, tools="resize, pan, wheel_zoom, box_zoom, reset",
             x_range=None, y_range=None, type_flag='normal', hover_flag=True):
+
     p = figure(width=plot_size, plot_height=plot_size, title=None, tools=tools, x_range=x_range, y_range=y_range)
     p.scatter(xvar, yvar, source=source, size=point_size, color=point_color)
     p.xaxis.axis_label = xlabel
     p.yaxis.axis_label = ylabel
 
-    # TODO: Update for multi_dist
+    # TODO: Fix dictionary ordering?
     if type_flag == "normal":
         tooltip = {"(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
     if type_flag == 'multi_rv':
         tooltip = {"RV": "@RV", "(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
+    if type_flag == 'multi_dist':
+        tooltip = {"Dist": "@Dist", "(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
 
     if hover_flag:
         p.add_tools(HoverTool(tooltips=tooltip))
