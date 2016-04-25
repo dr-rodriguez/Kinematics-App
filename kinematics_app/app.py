@@ -149,17 +149,22 @@ def app_results():
     nymg_plot(p1, p2, p3, p4, p5, p6)
 
     # TODO: Look into Bokeh tables
-    # columns = []
-    # for col in data.columns:
-    #     columns.append(TableColumn(field=col))
-    # data_table = DataTable(source=source, columns=columns, width=400, height=280)
+    columns = []
+    for col in data.columns:
+        columns.append(TableColumn(field=col, title=col))
+    data_table = DataTable(source=source, columns=columns, row_headers=False, width=400, height=280)
+    # print(data_table)
+    # from bokeh.io import output_file, show, vform
+    # output_file('deleteme.html')
+    # show(vform(data_table))
 
-    p = gridplot([[p1, p2, p3],[p4, p5, p6]], toolbar_location="left")
-    script, div = components(p)
-    # script, div_dict = components({'plot': p, 'table': data_table})
+    p = gridplot([[p1, p2, p3], [p4, p5, p6]], toolbar_location="left")
+    # script, div = components(p)
+    script, div_dict = components({'plot': p, 'table': data_table})
+    print(script)
+    print(div_dict)
 
-    return render_template('results.html', table=data.to_html(classes='display', index=False),
-                           script=script, div=div)
+    return render_template('results.html', script=script, div=div_dict)
 
 # Called when you click Resolve on Simbad button
 @app.route('/simbad', methods=['GET', 'POST'])

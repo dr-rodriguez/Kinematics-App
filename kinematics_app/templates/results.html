@@ -1,22 +1,20 @@
 <!doctype html>
 <title>Results</title>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
-<script src="{{ url_for('static', filename='jquery-1.12.0.min.js')}} "></script>
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.js"></script>
+<!--<script src="{{ url_for('static', filename='jquery-1.12.0.min.js')}} "></script>-->
+<!--<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.js"></script>-->
 <link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-0.11.0.min.css" type="text/css" />
 <script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-0.11.0.min.js"></script>
 
-<script>
-    $(document).ready( function () {
-      $('.dataframe').DataTable( {
-        "paging": false,
-        "info": false,
-        "searching": false
-      } );
-    } );
-</script>
-
-{{ script|safe }}
+<!--<script>-->
+    <!--$(document).ready( function () {-->
+      <!--$('.dataframe').DataTable( {-->
+        <!--"paging": false,-->
+        <!--"info": false,-->
+        <!--"searching": false-->
+      <!--} );-->
+    <!--} );-->
+<!--</script>-->
 
 <header id="branding">
     <img src="static/images/BDNYC-logo.gif" width="500px">
@@ -29,14 +27,15 @@
 <div class=page>
     <h1>Results</h1>
 
-    <!--{{ div.plot|safe }}-->
-    <!--<br>-->
-    <!--{{ div.table|safe }}-->
+    {{ div.plot|safe }}
+    {{ div.table|safe }}
 
-    {{ div|safe }}
-    <br>
-    {{ table|safe }}
+    <!--{{ div|safe }}-->
+    <!--<br>-->
+    <!--{{ table|safe }}-->
 
     <p><a href="query">Return to query</a></p>
 
 </div>
+
+{{ script|safe }}
