@@ -3,7 +3,8 @@ from druvw import xyz, uvw
 import pandas as pd
 from bokeh.plotting import figure, gridplot
 from bokeh.embed import components
-from bokeh.models import ColumnDataSource, HoverTool
+from bokeh.models import ColumnDataSource, HoverTool, DataTable, TableColumn
+from bokeh.io import vform
 from astroquery.simbad import Simbad
 import math
 import numpy as np
@@ -112,7 +113,7 @@ def app_results():
 
     # Figures
     source = ColumnDataSource(data=data)
-    tools = "resize, pan, wheel_zoom, box_zoom, reset"
+    tools = "resize, pan, wheel_zoom, box_zoom, lasso_select, box_select, reset, save"
     plot_size = 350
     point_size = 10
     point_color = 'black'
@@ -147,10 +148,18 @@ def app_results():
     # Nearby Young Moving Groups
     nymg_plot(p1, p2, p3, p4, p5, p6)
 
+    # TODO: Look into Bokeh tables
+    # columns = []
+    # for col in data.columns:
+    #     columns.append(TableColumn(field=col))
+    # data_table = DataTable(source=source, columns=columns, width=400, height=280)
+
     p = gridplot([[p1, p2, p3],[p4, p5, p6]], toolbar_location="left")
     script, div = components(p)
+    # script, div_dict = components({'plot': p, 'table': data_table})
 
-    return render_template('results.html', table=data.to_html(classes='display', index=False), script=script, plot=div)
+    return render_template('results.html', table=data.to_html(classes='display', index=False),
+                           script=script, div=div)
 
 # Called when you click Resolve on Simbad button
 @app.route('/simbad', methods=['GET', 'POST'])
@@ -185,6 +194,10 @@ def app_simbad():
 def app_clear():
     clear_values()
     return redirect('/query')
+
+# TODO: Load file functionality
+# TODO: Access bdnyc database functionality
+# TODO: Save file functionality
 
 # Function to clear values
 def clear_values():
