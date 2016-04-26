@@ -147,7 +147,6 @@ def app_results():
     # Nearby Young Moving Groups
     nymg_plot(p1, p2, p3, p4, p5, p6)
 
-    # TODO: Look into Bokeh tables
     columns = []
     for col in data.columns:
         if col in ['Dist', 'RV', 'Name']:
