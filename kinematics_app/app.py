@@ -26,6 +26,7 @@ app.vars['dist_ini'] = ''
 app.vars['dist_fin'] = ''
 app.vars['dist_step'] = ''
 
+
 # Redirect to the main page
 @app.route('/')
 @app.route('/index')
@@ -34,6 +35,7 @@ app.vars['dist_step'] = ''
 def app_home():
     return redirect('/query')
 
+
 # Main page for queries
 @app.route('/query', methods=['GET', 'POST'])
 def app_query():
@@ -41,6 +43,7 @@ def app_query():
                            pmdec=app.vars['pmdec'], rv=app.vars['rv'], dist=app.vars['dist'], name=app.vars['name'],
                            rv_ini=app.vars['rv_ini'], rv_fin=app.vars['rv_fin'], rv_step=app.vars['rv_step'],
                            dist_ini=app.vars['dist_ini'], dist_fin=app.vars['dist_fin'], dist_step=app.vars['dist_step'])
+
 
 # Calculate for known values
 @app.route('/results', methods=['GET', 'POST'])
@@ -160,6 +163,7 @@ def app_results():
 
     return render_template('results.html', script=script, div=div_dict)
 
+
 # Called when you click Resolve on Simbad button
 @app.route('/simbad', methods=['GET', 'POST'])
 def app_simbad():
@@ -188,6 +192,7 @@ def app_simbad():
 
     return redirect('/query')
 
+
 # Called when you click clear button
 @app.route('/clear')
 def app_clear():
@@ -196,12 +201,13 @@ def app_clear():
 
 # TODO: Load file functionality
 # TODO: Access bdnyc database functionality
-# TODO: Save file functionality
+
 
 # Function to clear values
 def clear_values():
     for key in app.vars.keys():
         app.vars[key] = ''
+
 
 # Function to convert to numbers and have proper error handling
 def number_convert(x):
@@ -210,6 +216,7 @@ def number_convert(x):
     except ValueError:
         val = np.nan
     return val
+
 
 # Function to plot the NYMG ovals
 def nymg_plot(p1,p2,p3,p4,p5,p6):
@@ -256,6 +263,7 @@ def nymg_plot(p1,p2,p3,p4,p5,p6):
 
     return
 
+
 # Function to make the basic plots
 def my_plot(xvar, yvar, source, xlabel, ylabel, point_size=10,
             point_color='black', plot_size=350, tools="resize, pan, wheel_zoom, box_zoom, reset",
@@ -278,3 +286,10 @@ def my_plot(xvar, yvar, source, xlabel, ylabel, point_size=10,
         p.add_tools(HoverTool(tooltips=tooltip))
 
     return p
+
+
+# TODO: Save file functionality
+# Function to save calculated values
+@app.route('/save', methods=['GET', 'POST'])
+def app_save():
+    return
