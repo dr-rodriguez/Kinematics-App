@@ -3,8 +3,7 @@ from druvw import xyz, uvw
 import pandas as pd
 from bokeh.plotting import figure, gridplot
 from bokeh.embed import components
-from bokeh.models import ColumnDataSource, HoverTool, DataTable, TableColumn
-from bokeh.io import vform
+from bokeh.models import ColumnDataSource, HoverTool, DataTable, TableColumn, NumberFormatter
 from astroquery.simbad import Simbad
 import math
 import numpy as np
@@ -151,18 +150,14 @@ def app_results():
     # TODO: Look into Bokeh tables
     columns = []
     for col in data.columns:
-        columns.append(TableColumn(field=col, title=col))
-    data_table = DataTable(source=source, columns=columns, row_headers=False, width=400, height=280)
-    # print(data_table)
-    # from bokeh.io import output_file, show, vform
-    # output_file('deleteme.html')
-    # show(vform(data_table))
+        if col in ['Dist', 'RV', 'Name']:
+            columns.append(TableColumn(field=col, title=col))
+        else:
+            columns.append(TableColumn(field=col, title=col, formatter=NumberFormatter(format='0.000')))
+    data_table = DataTable(source=source, columns=columns, row_headers=False, width=800, height=400)
 
     p = gridplot([[p1, p2, p3], [p4, p5, p6]], toolbar_location="left")
-    # script, div = components(p)
     script, div_dict = components({'plot': p, 'table': data_table})
-    print(script)
-    print(div_dict)
 
     return render_template('results.html', script=script, div=div_dict)
 

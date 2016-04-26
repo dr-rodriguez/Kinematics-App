@@ -5,6 +5,8 @@
 <!--<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.js"></script>-->
 <link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-0.11.0.min.css" type="text/css" />
 <script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-0.11.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-widgets-0.11.0.min.css" type="text/css" />
+<script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-widgets-0.11.0.min.js"></script>
 
 <!--<script>-->
     <!--$(document).ready( function () {-->
@@ -27,14 +29,19 @@
 <div class=page>
     <h1>Results</h1>
 
-    {{ div.plot|safe }}
-    {{ div.table|safe }}
+    <center>
+        {{ div.plot|safe }}
+    </center>
 
-    <!--{{ div|safe }}-->
-    <!--<br>-->
-    <!--{{ table|safe }}-->
+    <br>
+    <hr>
+    <br>
 
-    <p><a href="query">Return to query</a></p>
+    <center>
+        {{ div.table|safe }}
+    </center>
+
+    <p><a href="query">Return to form</a></p>
 
 </div>
 
