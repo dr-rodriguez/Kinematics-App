@@ -29,6 +29,19 @@
         {{ div.table|safe }}
     </center>
 
+    <hr>
+
+    <form id='formatselect' method='post' action='save' >
+        <p>Save to a file:
+            <select name="format">
+                <option value="csv">CSV</option>
+                <option value="html">HTML</option>
+                <option value="ascii">ASCII</option>
+            </select>
+            <input type='submit' value='Save' />
+        </p>
+    </form>
+
     <p><a href="query">Return to form</a></p>
 
 </div>

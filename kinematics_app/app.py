@@ -1,11 +1,11 @@
-from flask import Flask, redirect, render_template, request
+from flask import Flask, redirect, render_template, request, make_response
 from druvw import xyz, uvw
 import pandas as pd
 from bokeh.plotting import figure, gridplot
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource, HoverTool, DataTable, TableColumn, NumberFormatter
 from astroquery.simbad import Simbad
-import math
+import math, os
 import numpy as np
 
 app = Flask(__name__)
@@ -25,6 +25,7 @@ app.vars['rv_step'] = ''
 app.vars['dist_ini'] = ''
 app.vars['dist_fin'] = ''
 app.vars['dist_step'] = ''
+app.vars['data'] = pd.DataFrame()
 
 
 # Redirect to the main page
@@ -57,7 +58,7 @@ def app_results():
     # Convert to numbers
     df = dict()
     for key in app.vars:
-        if key in ['name']: continue  # don't convert
+        if key in ['name', 'data']: continue  # don't convert
 
         if request.form['type_flag'] == 'normal':
             if key in ['rv_ini', 'rv_fin', 'rv_step', 'dist_ini', 'dist_fin', 'dist_step']: continue
@@ -113,6 +114,8 @@ def app_results():
     if request.form['type_flag'] == 'multi_dist':
         data = pd.DataFrame({'Dist': dist_array, 'X': x, 'Y': y, 'Z': z, 'U': u, 'V': v, 'W': w})
 
+    app.vars['data'] = data  # save in case user wants file output
+
     # Figures
     source = ColumnDataSource(data=data)
     tools = "resize, pan, wheel_zoom, box_zoom, lasso_select, box_select, reset, save"
@@ -150,13 +153,19 @@ def app_results():
     # Nearby Young Moving Groups
     nymg_plot(p1, p2, p3, p4, p5, p6)
 
+    # Select table height
+    if len(data) > 1:
+        tabheight = 400
+    else:
+        tabheight = 100
+
     columns = []
     for col in data.columns:
         if col in ['Dist', 'RV', 'Name']:
             columns.append(TableColumn(field=col, title=col))
         else:
             columns.append(TableColumn(field=col, title=col, formatter=NumberFormatter(format='0.000')))
-    data_table = DataTable(source=source, columns=columns, row_headers=False, width=800, height=400)
+    data_table = DataTable(source=source, columns=columns, row_headers=False, width=800, height=tabheight)
 
     p = gridplot([[p1, p2, p3], [p4, p5, p6]], toolbar_location="left")
     script, div_dict = components({'plot': p, 'table': data_table})
@@ -292,4 +301,24 @@ def my_plot(xvar, yvar, source, xlabel, ylabel, point_size=10,
 # Function to save calculated values
 @app.route('/save', methods=['GET', 'POST'])
 def app_save():
-    return
+    export_fmt = request.form['format']
+    data = app.vars['data']
+
+    if export_fmt == 'csv':
+        filename = 'results.txt'
+        data.to_csv(filename, index=False)
+    elif export_fmt == 'html':
+        filename = 'results.html'
+        data.to_html(filename, index=False)
+    elif export_fmt == 'ascii':
+        filename = 'results.txt'
+        data.to_csv(filename, sep=' ', index=False)
+
+    with open(filename, 'r') as f:
+        file_as_string = f.read()
+    os.remove(filename)  # Delete the file after it's read
+
+    response = make_response(file_as_string)
+    response.headers["Content-Disposition"] = "attachment; filename=%s" % filename
+    return response
+
