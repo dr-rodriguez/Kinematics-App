@@ -297,7 +297,6 @@ def my_plot(xvar, yvar, source, xlabel, ylabel, point_size=10,
     return p
 
 
-# TODO: Save file functionality
 # Function to save calculated values
 @app.route('/save', methods=['GET', 'POST'])
 def app_save():
