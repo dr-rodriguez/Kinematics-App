@@ -212,6 +212,7 @@ def app_clear():
 # TODO: Access bdnyc database functionality
 
 
+# TODO: Test that clearing function does not fail with DataFrame structure
 # Function to clear values
 def clear_values():
     for key in app.vars.keys():
@@ -227,6 +228,7 @@ def number_convert(x):
     return val
 
 
+# TODO: See if it's possible to configure NYMG ovals as something that can be togled on/off in Bokeh
 # Function to plot the NYMG ovals
 def nymg_plot(p1,p2,p3,p4,p5,p6):
     g_name = ['bPMG', 'TWA', 'THA', 'COL', 'CAR', 'ARG', 'ABDMG']

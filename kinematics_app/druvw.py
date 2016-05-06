@@ -11,8 +11,22 @@ from astropy.coordinates import SkyCoord
 import numpy as np
 
 # ===================================================
-# Function to calculate UVW given RA, Dec, Distance, RV, and PMs
+
 def uvw(ra,dec,d,pmra,pmde,rv):
+    """
+    Function to calculate UVW given RA, Dec, Distance, RV, and PMs
+    Adapted from http://idlastro.gsfc.nasa.gov/ftp/pro/astro/gal_uvw.pro
+
+    :param ra: Right Ascension in degrees
+    :param dec: Declination in degrees
+    :param d: Distance in parsecs
+    :param pmra: Proper motion in RA in milliarcseconds/year
+    :param pmde:
+    :param rv:
+
+    :return:
+
+    """
     k = 4.74047 #Equivalent of 1 A.U/yr in km/s
     A00 = 0.0548755604
     A01 = 0.8734370902
