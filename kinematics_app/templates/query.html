@@ -22,10 +22,18 @@
 
         <h4 id="all_known">Calculate XYZUVW</h4>
 
-        <form method='post' action="simbad">
-            <p>Grab information from Simbad: </p>
-            <input TYPE="TEXT" NAME="name" VALUE="{{name}}" SIZE=20> <input type="submit" value="Resolve">
+        <form action="clear">
+            <input type="submit" value="Clear Form">
         </form>
+
+        <form method='post' action="simbad">
+            <p>
+                Grab information from Simbad:
+                <input TYPE="TEXT" NAME="name" VALUE="{{name}}" SIZE=20> <input type="submit" value="Resolve">
+            </p>
+        </form>
+
+        <hr>
 
         <form id='all_known' method='post' action='results' >
             <p> Normal calculation:</p>
@@ -41,9 +49,7 @@
             </p>
         </form>
 
-        <form action="clear">
-            <input type="submit" value="Clear Form">
-        </form>
+        <hr>
 
         <form id="multi_rv" method="post" action="results">
             <p>Range of radial velocity:</p>
