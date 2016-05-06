@@ -15,15 +15,36 @@
 
     <div class=metanav>
         <p>
-            Text here
+            This application converts stellar parameters, such as Right Ascension, Declination, distance, etc, and
+            transforms them to Cartesian XYZ coordinates centered on the Sun. <br>
+            Velocities are returned as UVW velocities along the same axes with X/U positive
+            towards the Galactic center, Y/V positive in the direction of the
+            Sun's motion around the Galaxy, and Z/W positive out of the plane of the Galaxy. <br>
+
+            You can resolve objects with Simbad to grab input parameters to use. In the absence of distance or
+            radial velocity information, this application can generate XYZUVW for a range. <br>
+            Note that all information entered in this application is <b>not stored on our server</b>.
+            <br>
+
+            [include a figure of XYZ/UVW?]
+        </p>
+        <p>
+            This application displays the locations of nearby stellar moving groups from Malo et al. (2012) [ADD LINK].
+            These groups contain stars with ages of ~10-100 million years.
+        </p>
+        <p>
+            This application runs on Python and has been created by
+            <a href="http://dr-rodriguez.github.io/">David R. Rodriguez</a>.
+            You can grab a copy of the code on <a href="https://github.com/dr-rodriguez/Kinematics-App">GitHub</a>. <br>
+            Publications that benefit from this application should cite this record [ADD ZENODO LINK].
         </p>
 
         <hr>
 
-        <h4 id="all_known">Calculate XYZUVW</h4>
+        <!--<h4 id="all_known">Calculate XYZUVW</h4>-->
 
         <form action="clear">
-            <input type="submit" value="Clear Form">
+            <input type="submit" value="Clear All Values">
         </form>
 
         <form method='post' action="simbad">
@@ -36,7 +57,7 @@
         <hr>
 
         <form id='all_known' method='post' action='results' >
-            <p> Normal calculation:</p>
+            <h4> Normal calculation:</h4>
             <p>
                 <input TYPE="TEXT" NAME="ra" VALUE="{{ra}}" SIZE=10>  RA (J2000, deg)<BR>
                 <input TYPE="TEXT" NAME="dec" VALUE="{{dec}}" SIZE=10>  Dec (J2000, deg)<BR>
@@ -52,7 +73,7 @@
         <hr>
 
         <form id="multi_rv" method="post" action="results">
-            <p>Range of radial velocity:</p>
+            <h4>Range of radial velocities:</h4>
             <p>
                 <input type="text" name="rv_ini" value="{{rv_ini}}" size=10> Initial Velocity (km/s)<br>
                 <input type="text" name="rv_fin" value="{{rv_fin}}" size=10> Final Velocity (km/s)<br>
@@ -63,7 +84,7 @@
         </form>
 
         <form id="multi_dist" method="post" action="results">
-            <p>Range of distances:</p>
+            <h4>Range of distances:</h4>
             <p>
                 <input type="text" name="dist_ini" value="{{dist_ini}}" size=10> Initial Distance (pc)<br>
                 <input type="text" name="dist_fin" value="{{dist_fin}}" size=10> Final Distance (pc)<br>
