@@ -23,20 +23,19 @@
 
             You can resolve objects with Simbad to grab input parameters to use. In the absence of distance or
             radial velocity information, this application can generate XYZUVW for a range. <br>
-            Note that all information entered in this application is <b>not stored on our server</b>.
-            <br>
-
-            [include a figure of XYZ/UVW?]
+            Note that <b>information entered in this application is not stored on our server</b>.
         </p>
         <p>
-            This application displays the locations of nearby stellar moving groups from Malo et al. (2012) [ADD LINK].
-            These groups contain stars with ages of ~10-100 million years.
+            This application displays the locations of nearby stellar moving groups from
+            <a href="http://adsabs.harvard.edu/abs/2013ApJ...762...88M">Malo et al. (2013)</a>.
+            These groups contain stars with ages of ~10-100 million years and distances within ~150 parsecs of Earth.
         </p>
         <p>
             This application runs on Python and has been created by
             <a href="http://dr-rodriguez.github.io/">David R. Rodriguez</a>.
             You can grab a copy of the code on <a href="https://github.com/dr-rodriguez/Kinematics-App">GitHub</a>. <br>
-            Publications that benefit from this application should cite this record [ADD ZENODO LINK].
+            We welcome feedback in order to improve this application.
+            <!--Publications that benefit from this should cite this record [ADD ZENODO LINK].-->
         </p>
 
         <hr>
@@ -50,7 +49,7 @@
         <form method='post' action="simbad">
             <p>
                 Grab information from Simbad:
-                <input TYPE="TEXT" NAME="name" VALUE="{{name}}" SIZE=20> <input type="submit" value="Resolve">
+                <input TYPE="TEXT" NAME="name" VALUE="{{name}}" SIZE=20> <input type="submit" value="Resolve Name">
             </p>
         </form>
 
@@ -66,42 +65,55 @@
                 <input TYPE="TEXT" NAME="dist" VALUE="{{dist}}" SIZE=10>  Distance (pc)<BR>
                 <input TYPE="TEXT" NAME="rv" VALUE="{{rv}}" SIZE=10>  Radial Velocity (km/s)<BR>
                 <input type="hidden" name="type_flag" value="normal">
+                <br>
                 <input type='submit' value='Calculate' />
             </p>
         </form>
 
         <hr>
 
-        <form id="multi_rv" method="post" action="results">
+        <div class="rvrange">
+            <form id="multi_rv" method="post" action="results">
             <h4>Range of radial velocities:</h4>
-            <p>
-                <input type="text" name="rv_ini" value="{{rv_ini}}" size=10> Initial Velocity (km/s)<br>
-                <input type="text" name="rv_fin" value="{{rv_fin}}" size=10> Final Velocity (km/s)<br>
-                <input type="text" name="rv_step" value="{{rv_step}}" size=10> Velocity Step (km/s)<br>
-                <input type="hidden" name="type_flag" value="multi_rv">
-                <input type="submit" value="Calculate">
-            </p>
-        </form>
+                <p>
+                    <input type="text" name="rv_ini" value="{{rv_ini}}" size=10> Initial Velocity (km/s)<br>
+                    <input type="text" name="rv_fin" value="{{rv_fin}}" size=10> Final Velocity (km/s)<br>
+                    <input type="text" name="rv_step" value="{{rv_step}}" size=10> Velocity Step (km/s)<br>
+                    <input type="hidden" name="type_flag" value="multi_rv">
+                    <br>
+                    <input type="submit" value="Calculate">
+                </p>
+            </form>
+        </div>
 
-        <form id="multi_dist" method="post" action="results">
+        <div class="distrange">
+            <form id="multi_dist" method="post" action="results">
             <h4>Range of distances:</h4>
-            <p>
-                <input type="text" name="dist_ini" value="{{dist_ini}}" size=10> Initial Distance (pc)<br>
-                <input type="text" name="dist_fin" value="{{dist_fin}}" size=10> Final Distance (pc)<br>
-                <input type="text" name="dist_step" value="{{dist_step}}" size=10> Distance Step (pc)<br>
-                <input type="hidden" name="type_flag" value="multi_dist">
-                <input type="submit" value="Calculate">
-            </p>
-        </form>
+                <p>
+                    <input type="text" name="dist_ini" value="{{dist_ini}}" size=10> Initial Distance (pc)<br>
+                    <input type="text" name="dist_fin" value="{{dist_fin}}" size=10> Final Distance (pc)<br>
+                    <input type="text" name="dist_step" value="{{dist_step}}" size=10> Distance Step (pc)<br>
+                    <input type="hidden" name="type_flag" value="multi_dist">
+                    <br>
+                    <input type="submit" value="Calculate">
+                </p>
+            </form>
+        </div>
+
+        <div class="clearfix"></div>
 
     </div>
 
     <hr>
 
-    <p id="grey_note">
-        Created by <a href="http://dr-rodriguez.github.io/">David R. Rodriguez</a> for the
-        <a href="http://www.bdnyc.org/">Brown Dwarfs in New York City (BDNYC)</a> research team.
-    </p>
+    <div>
+        <p id="grey_note">
+            Created by <a href="http://dr-rodriguez.github.io/">David R. Rodriguez</a> for the
+            <a href="http://www.bdnyc.org/">Brown Dwarfs in New York City (BDNYC)</a> research team.
+        </p>
+    </div>
+
+
 
 </div>
 
