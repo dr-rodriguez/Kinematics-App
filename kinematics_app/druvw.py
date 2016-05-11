@@ -1,7 +1,5 @@
-#!/usr/bin/python
-
 """
-David Rodriguez
+David R. Rodriguez
 
 Package containing UVW and XYZ functions
 """
@@ -10,9 +8,9 @@ from math import cos, sin
 from astropy.coordinates import SkyCoord
 import numpy as np
 
-# ===================================================
 
-def uvw(ra,dec,d,pmra,pmde,rv):
+# ===================================================
+def uvw(ra, dec, d, pmra, pmde, rv):
     """
     Function to calculate UVW given RA, Dec, Distance, RV, and PMs
     Adapted from http://idlastro.gsfc.nasa.gov/ftp/pro/astro/gal_uvw.pro
@@ -20,14 +18,14 @@ def uvw(ra,dec,d,pmra,pmde,rv):
     :param ra: Right Ascension in degrees
     :param dec: Declination in degrees
     :param d: Distance in parsecs
-    :param pmra: Proper motion in RA in milliarcseconds/year
-    :param pmde:
-    :param rv:
+    :param pmra: Proper motion in RA in milli-arcseconds/year
+    :param pmde: Proper motion in Dec in milli-arcseconds/year
+    :param rv: Radial velocity in km/s
 
-    :return:
+    :return: U, V, W in km/s
 
     """
-    k = 4.74047 #Equivalent of 1 A.U/yr in km/s
+    k = 4.74047  # Equivalent of 1 A.U/yr in km/s
     A00 = 0.0548755604
     A01 = 0.8734370902
     A02 = 0.4838350155
@@ -46,18 +44,18 @@ def uvw(ra,dec,d,pmra,pmde,rv):
     pmra = np.array(pmra)
     pmde = np.array(pmde)
 
-    radcon = 3.1415926/180 # radian conversion factor
+    radcon = 3.1415926/180  # radian conversion factor
 
     try:
         cosd = cos(dec * radcon)
         sind = sin(dec * radcon)
         cosa = cos(ra * radcon)
         sina = sin(ra * radcon)
-    except TypeError:
-        cosd = np.array(map(cos,dec * radcon))
-        sind = np.array(map(sin,dec * radcon))
-        cosa = np.array(map(cos,ra * radcon))
-        sina = np.array(map(sin,ra * radcon))
+    except TypeError:  # For arrays
+        cosd = np.array(map(cos, dec * radcon))
+        sind = np.array(map(sin, dec * radcon))
+        cosa = np.array(map(cos, ra * radcon))
+        sina = np.array(map(sin, ra * radcon))
 
     vec1 = rv
     plx = 1000./d
@@ -73,34 +71,40 @@ def uvw(ra,dec,d,pmra,pmde,rv):
     w = (A20*cosa*cosd + A21*sina*cosd + A22*sind) * vec1 + \
         (-A20*sina + A21*cosa) * vec2 + \
         (-A20*cosa*sind - A21*sina*sind + A22*cosd) * vec3
-    u = -u
+    u = -u  # Flipping U to be positive towards Galactic center
 
-    return u,v,w
+    return u, v, w
 
 
 # ===================================================
-# Function to XYZ given RA, Dec, and Distance
-def xyz(ra,dec,d):
+def xyz(ra, dec, d):
+    """
+    Function to calculate XYZ given RA, Dec, and Distance
+
+    :param ra: Right Ascension in degrees
+    :param dec: Declination in degrees
+    :param d: Distance in parsecs
+
+    :return: X, Y, Z in parsecs
+    """
 
     ra = np.array(ra)
     dec = np.array(dec)
     d = np.array(d)
 
     c = SkyCoord(ra=ra, dec=dec, frame='icrs', unit='deg')
-    l,b = c.galactic.l.radian,c.galactic.b.radian
+    l, b = c.galactic.l.radian, c.galactic.b.radian
 
     try:
        xgc = d * cos(b) * cos(l)
        ygc = d * cos(b) * sin(l)
        zgc = d * sin(b)
-    except TypeError:
-        xgc = d * map(cos,b) * map(cos,l)
-        ygc = d * map(cos,b) * map(sin,l)
-        zgc = d * map(sin,b)
+    except TypeError:  # For arrays
+        xgc = d * map(cos, b) * map(cos, l)
+        ygc = d * map(cos, b) * map(sin, l)
+        zgc = d * map(sin, b)
 
-   # See http://www.astro.virginia.edu/class/majewski/astr551/lectures/COORDS/coords.html
-
-    return xgc,ygc,zgc
+    return xgc, ygc, zgc
 
 # ===================================================
 
