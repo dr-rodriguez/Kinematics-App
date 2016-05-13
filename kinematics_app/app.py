@@ -253,7 +253,9 @@ def nymg_plot(p1,p2,p3,p4,p5,p6):
     # Hover does not work for Oval :(
     p1.oval(x=g_X, y=g_Y, width=g_Xe * 2, height=g_Ye * 2, color=g_color,
             angle=0, height_units='data', width_units='data', fill_alpha=0.5)
-    p1.text(x=g_X, y=g_Y, text=g_name, text_color='black', angle=0, text_alpha=0.5)
+    # p1.text(x=g_X, y=g_Y, text=g_name, text_color='black', angle=0, text_alpha=0.5)
+    y_text_loc = [40 - y*6 for y in range(len(g_name))]
+    p1.text(x=-60, y=y_text_loc, text=g_name, text_color=g_color, angle=0, text_font_size='8pt')
 
     p2.oval(x=g_Y, y=g_Z, width=g_Ye * 2, height=g_Ze * 2, color=g_color,
             angle=0, height_units='data', width_units='data', fill_alpha=0.5)
@@ -263,13 +265,20 @@ def nymg_plot(p1,p2,p3,p4,p5,p6):
 
     p4.oval(x=g_U, y=g_V, width=g_Ue * 2, height=g_Ve * 2, color=g_color,
             angle=0, height_units='data', width_units='data', fill_alpha=0.5)
-    p4.text(x=g_U, y=g_V, text=g_name, text_color='black', angle=0, text_alpha=0.5)
+    # p4.text(x=g_U, y=g_V, text=g_name, text_color='black', angle=0, text_alpha=0.5)
+    y_text_loc = [-20 - y*1.2 for y in range(len(g_name))]
+    p4.text(x=-25, y=y_text_loc, text=g_name, text_color=g_color, angle=0, text_font_size='8pt')
 
     p5.oval(x=g_V, y=g_W, width=g_Ve * 2, height=g_We * 2, color=g_color,
             angle=0, height_units='data', width_units='data', fill_alpha=0.5)
 
     p6.oval(x=g_U, y=g_W, width=g_Ue * 2, height=g_We * 2, color=g_color,
             angle=0, height_units='data', width_units='data', fill_alpha=0.5)
+
+    # Update grid alpha
+    for p in [p1, p2, p3, p4, p5, p6]:
+        p.xgrid.grid_line_alpha = 0.2
+        p.ygrid.grid_line_alpha = 0.2
 
     return
 
