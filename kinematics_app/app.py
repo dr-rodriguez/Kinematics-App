@@ -26,6 +26,7 @@ app.vars['dist_ini'] = ''
 app.vars['dist_fin'] = ''
 app.vars['dist_step'] = ''
 app.vars['data'] = pd.DataFrame()
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # maximum size for uploads (16MB)
 
 
 # Redirect to the main page
@@ -208,7 +209,133 @@ def app_clear():
     clear_values()
     return redirect('/query')
 
-# TODO: Load file functionality
+
+@app.route('/file_upload', methods=['POST'])
+def app_file():
+    ALLOWED_EXTENSIONS = set(['txt', 'dat', 'csv', 'text'])
+
+    # Check if the post request has the file part
+    if 'file' not in request.files:
+        return redirect('/query')
+
+    file = request.files['file']
+
+    # Check if user did not select file
+    if file.filename == '':
+        return redirect('/query')
+
+    # Check that it's an ascii file
+    if not file.filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS:
+        return render_template('error.html', headermessage='Error',
+                               errmess='<p>Only files ending in txt, dat, csv, or text are supported. </p>')
+
+    # Read file
+    try:
+        df = pd.read_csv(file.stream, sep=',', header=0)
+    except:
+        return render_template('error.html', headermessage='Error',
+                               errmess='<p>Error processing file. Check your input. </p>')
+
+    # Process the columns
+    columns = df.columns.tolist()
+    columns = [proc_columns(c) for c in columns]
+    df.columns = columns
+
+    # Calculate the parameters
+    x, y, z = xyz(df['ra'], df['dec'], df['dist'])
+    u, v, w = uvw(df['ra'], df['dec'], df['dist'], df['pmra'], df['pmdec'], df['rv'])
+
+    data = pd.DataFrame({'Name': df['name'].tolist(), 'X': x, 'Y': y, 'Z': z, 'U': u, 'V': v, 'W': w})
+
+    app.vars['data'] = data  # save in case user wants file output
+
+    # Figures
+    source = ColumnDataSource(data=data)
+    tools = "resize, pan, wheel_zoom, box_zoom, lasso_select, box_select, reset, save"
+    plot_size = 350
+    point_size = 10
+    point_color = 'black'
+
+    hover_flags = [True, True]  # for XYZ and for UVW plots
+
+    # Create the main plots
+    # XYZ Plots
+    p1 = my_plot('X', 'Y', source, 'X (pc)', 'Y (pc)', x_range=None, y_range=None,
+                 point_size=point_size, point_color=point_color, plot_size=plot_size, tools=tools,
+                 type_flag='upload', hover_flag=hover_flags[0])
+    p2 = my_plot('Y', 'Z', source, 'Y (pc)', 'Z (pc)', x_range=p1.y_range, y_range=None,
+                 point_size=point_size, point_color=point_color, plot_size=plot_size, tools=tools,
+                 type_flag='upload', hover_flag=hover_flags[0])
+    p3 = my_plot('X', 'Z', source, 'X (pc)', 'Z (pc)', x_range=p1.x_range, y_range=p2.y_range,
+                 point_size=point_size, point_color=point_color, plot_size=plot_size, tools=tools,
+                 type_flag='upload', hover_flag=hover_flags[0])
+
+    # UVW Plots
+    p4 = my_plot('U', 'V', source, 'U (km/s)', 'V (km/s)', x_range=None, y_range=None,
+                 point_size=point_size, point_color=point_color, plot_size=plot_size, tools=tools,
+                 type_flag='upload', hover_flag=hover_flags[1])
+    p5 = my_plot('V', 'W', source, 'V (km/s)', 'W (km/s)', x_range=p4.y_range, y_range=None,
+                 point_size=point_size, point_color=point_color, plot_size=plot_size, tools=tools,
+                 type_flag='upload', hover_flag=hover_flags[1])
+    p6 = my_plot('U', 'W', source, 'U (km/s)', 'W (km/s)', x_range=p4.x_range, y_range=p5.y_range,
+                 point_size=point_size, point_color=point_color, plot_size=plot_size, tools=tools,
+                 type_flag='upload', hover_flag=hover_flags[1])
+
+    # Nearby Young Moving Groups
+    nymg_plot(p1, p2, p3, p4, p5, p6)
+
+    # Select table height
+    if len(data) > 1:
+        tabheight = 400
+    else:
+        tabheight = 100
+
+    columns = []
+    for col in data.columns:
+        if col in ['Dist', 'RV', 'Name']:
+            columns.append(TableColumn(field=col, title=col))
+        else:
+            columns.append(TableColumn(field=col, title=col, formatter=NumberFormatter(format='0.000')))
+    data_table = DataTable(source=source, columns=columns, row_headers=False, width=800, height=tabheight)
+
+    p = gridplot([[p1, p2, p3], [p4, p5, p6]], toolbar_location="left")
+    script, div_dict = components({'plot': p, 'table': data_table})
+
+    return render_template('results.html', script=script, div=div_dict)
+
+    # return df.to_html()
+
+
+# Function to process columns
+def proc_columns(col):
+    col = col.lower()
+
+    # Check if a name column:
+    if col in ['name', 'designation', 'object', 'object_name', 'object name', 'target', 'target name', 'target_name']:
+        return 'name'
+
+    # Check if ra/dec
+    if col in ['ra', 'ra2000', 'ra_2000', 'raj2000', 'ra_j2000']:
+        return 'ra'
+    if col in ['dec', 'dec2000', 'dec_2000', 'decj2000', 'dec_j2000',
+               'de', 'de2000', 'de_2000', 'dej2000', 'de_j2000']:
+        return 'dec'
+
+    # Check pmra/pmdec
+    if col in ['pmra', 'mura', 'mualpha', 'pmalpha', 'pm_ra', 'mu_ra']:
+        return 'pmra'
+    if col in ['pmdec', 'mudec', 'mudelta', 'pmdelta', 'pm_dec', 'mu_dec', 'pmde', 'mude', 'pm_de', 'mude']:
+        return 'pmdec'
+
+    # Check rv and distance
+    if col in ['rv', 'radial velocity', 'radial_velocity', 'velocity', 'v']:
+        return 'rv'
+    if col in ['dist', 'd', 'distance']:
+        return 'dist'
+
+    return col
+
+
 # TODO: Access bdnyc database functionality
 
 
@@ -299,6 +426,9 @@ def my_plot(xvar, yvar, source, xlabel, ylabel, point_size=10,
         tooltip = {"RV": "@RV", "(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
     if type_flag == 'multi_dist':
         tooltip = {"Dist": "@Dist", "(X,Y,Z)": "(@X, @Y, @Z)", "(U,V,W)": "(@U, @V, @W)"}
+    if type_flag == 'upload':
+        # this format preserves order
+        tooltip = [("Name", "@Name"), ("(X,Y,Z)", "(@X, @Y, @Z)"), ("(U,V,W)", "(@U, @V, @W)")]
 
     if hover_flag:
         p.add_tools(HoverTool(tooltips=tooltip))

@@ -101,6 +101,27 @@
 
         <div class="clearfix"></div>
 
+        <hr>
+
+        <form method="post" action="file_upload" enctype=multipart/form-data>
+            <h4>Multiple Targets:</h4>
+            <p>
+                Upload an ascii file with multiple targets to process.
+                The file should be comma-delimited and contain a header row. <br>
+                For example:
+            </p>
+
+            <code>
+                ra,dec,pmra,pmdec,name,dist,rv <br>
+                165.46,-34.70,-66,-13,TW Hya,53,14 <br>
+            </code>
+
+            <p>
+                The order of the columns does not matter as the header is used to determine the contents.<br><br>
+                <input type=file name=file><input type=submit value=Calculate>
+            </p>
+        </form>
+
     </div>
 
     <hr>
