@@ -320,7 +320,7 @@ def app_file():
 
 # Function to process columns
 def proc_columns(col):
-    col = col.lower()
+    col = col.lower().strip()
 
     # Check if a name column:
     if col in ['name', 'designation', 'object', 'object_name', 'object name', 'target', 'target name', 'target_name',
@@ -343,6 +343,7 @@ def proc_columns(col):
     # Check rv and distance
     if col in ['rv', 'radial velocity', 'radial_velocity', 'velocity', 'v']:
         return 'rv'
+
     if col in ['dist', 'd', 'distance']:
         return 'dist'
 
