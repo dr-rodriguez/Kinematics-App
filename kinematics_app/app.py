@@ -226,15 +226,15 @@ def app_file():
 
     # Check that it's an ascii file
     if not file.filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS:
-        return render_template('error.html', headermessage='Error',
+        return render_template('error.html', headermessage='Error Loading File',
                                errmess='<p>Only files ending in txt, dat, csv, or text are supported. </p>')
 
     # Read file
     try:
         df = pd.read_csv(file.stream, sep=',', header=0)
     except:
-        return render_template('error.html', headermessage='Error',
-                               errmess='<p>Error processing file. Check your input. </p>')
+        return render_template('error.html', headermessage='Error Processing File',
+                               errmess='<p>Check your input. </p>')
 
     # Process the columns
     columns = df.columns.tolist()
@@ -242,10 +242,22 @@ def app_file():
     df.columns = columns
 
     # Calculate the parameters
-    x, y, z = xyz(df['ra'], df['dec'], df['dist'])
-    u, v, w = uvw(df['ra'], df['dec'], df['dist'], df['pmra'], df['pmdec'], df['rv'])
+    try:
+        x, y, z = xyz(df['ra'], df['dec'], df['dist'])
+        u, v, w = uvw(df['ra'], df['dec'], df['dist'], df['pmra'], df['pmdec'], df['rv'])
+    except KeyError:
+        return render_template('error.html', headermessage='Error Processing File',
+                               errmess='<p>Check that you provided all columns. </p>')
+    except ValueError:
+        return render_template('error.html', headermessage='Error Processing File',
+                               errmess='<p>Check that you provided numeric values for all columns '
+                                       '(except for the name column). </p>')
 
-    data = pd.DataFrame({'Name': df['name'].tolist(), 'X': x, 'Y': y, 'Z': z, 'U': u, 'V': v, 'W': w})
+    try:
+        data = pd.DataFrame({'Name': df['name'].tolist(), 'X': x, 'Y': y, 'Z': z, 'U': u, 'V': v, 'W': w})
+    except KeyError:
+        return render_template('error.html', headermessage='Error Processing File',
+                               errmess='<p>A name, designation, or identifier column is required. </p>')
 
     app.vars['data'] = data  # save in case user wants file output
 
@@ -311,7 +323,8 @@ def proc_columns(col):
     col = col.lower()
 
     # Check if a name column:
-    if col in ['name', 'designation', 'object', 'object_name', 'object name', 'target', 'target name', 'target_name']:
+    if col in ['name', 'designation', 'object', 'object_name', 'object name', 'target', 'target name', 'target_name',
+               'identifier', 'id', 'objid', 'obj_id', 'obj id', 'source', 'source id', 'source_id']:
         return 'name'
 
     # Check if ra/dec
